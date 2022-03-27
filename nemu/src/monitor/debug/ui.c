@@ -27,6 +27,14 @@ char* rl_gets() {
   return line_read;
 }
 
+static int cmd_si(char *args) {
+	int step;
+	if (args == NULL) step = 1;
+	else sscanf(args, "%d", &step);
+	cpu_exec(step);
+	return 0;
+}
+
 static int cmd_c(char *args) {
   cpu_exec(-1);
   return 0;
@@ -46,10 +54,11 @@ static struct {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
+  {"si", "Si 10 allows the program to suspend execution after executing 10 instructions in a single step. When n is not given, it defaults to 1",cmd_si}
 
   /* TODO: Add more commands */
-
 };
+
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
 
