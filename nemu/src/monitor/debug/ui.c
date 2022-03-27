@@ -27,6 +27,16 @@ char* rl_gets() {
   return line_read;
 }
 
+static int cmd_info(char *args)  {  
+    char *arg=strtok(NULL," ");  
+    if(strcmp(arg,"r") == 0){  
+        for(int i=0;i<8;i++)  
+            printf("%s \t%x \t%d\n",regsl[i],cpu.gpr[i]._32,cpu.gpr[i]._32);  
+        printf("$eip \t%x \t%d\n", cpu.eip, cpu.eip); 
+    }  
+    return 0;  
+} 
+
 static int cmd_si(char *args) {
 	int step;
 	if (args == NULL) step = 1;
@@ -54,8 +64,8 @@ static struct {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  {"si", "Si 10 allows the program to suspend execution after executing 10 instructions in a single step. When n is not given, it defaults to 1",cmd_si}
-
+  {"si", "Si 10 allows the program to suspend execution after executing 10 instructions in a single step. When n is not given, it defaults to 1",cmd_si},
+  {"info","Info R is used to print register status",cmd_info}
   /* TODO: Add more commands */
 };
 
