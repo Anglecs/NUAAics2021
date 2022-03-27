@@ -27,6 +27,25 @@ char* rl_gets() {
   return line_read;
 }
 
+static int cmd_x(char *args){  
+    char *N = strtok(NULL," ");  
+    char *EXPR = strtok(NULL," ");  
+    int len;  
+    vaddr_t address;  
+      
+    sscanf(N, "%d", &len);  
+    sscanf(EXPR, "%x", &address);  
+      
+    printf("0x%x:",address);  
+    int i;
+    for(i = 0; i < len; i ++){  
+        printf("%08x ",vaddr_read(address,4));  
+        address += 4;  
+    }  
+    printf("\n");  
+    return 0;  
+}
+
 static int cmd_info(char *args)  {  
     char *arg=strtok(NULL," ");  
     if(strcmp(arg,"r") == 0){  
@@ -65,7 +84,8 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   {"si", "Si 10 allows the program to suspend execution after executing 10 instructions in a single step. When n is not given, it defaults to 1",cmd_si},
-  {"info","Info R is used to print register status",cmd_info}
+  {"info","Info R is used to print register status",cmd_info},
+  {"x","X 10 $ESP finds the value of expression expr, takes the result as the starting memory address, and outputs n consecutive 4 bytes in hexadecimal form",cmd_x}
   /* TODO: Add more commands */
 };
 
