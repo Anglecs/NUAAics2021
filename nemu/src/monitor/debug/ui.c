@@ -39,9 +39,12 @@ static int cmd_x(char *args){
     printf("0x%x:",address);  
     int i;
     for(i = 0; i < len; i ++){  
-        printf("%08x ",vaddr_read(address,4));  
-        address += 4;  
-    }  
+        printf("%08x ",vaddr_read(address+i*4,4));  
+        uint32_t x = vaddr_read(address + i * 4, 4);
+        for (int j = 0; j < 4; j++) {
+            printf("%02x ", x & 0xff);
+            x = x >> 8;}
+    }    
     printf("\n");  
     return 0;  
 }
