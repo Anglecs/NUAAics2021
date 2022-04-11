@@ -142,17 +142,17 @@ static bool make_token(char *e) {
 
   return true;
 }
-bool check_parentheses(int start, int end)
+bool check_parentheses(int p, int q)
 {
     int i;
-	if (tokens[start].type == '(' && tokens[end].type ==')')
+	if (tokens[p].type == '(' && tokens[q].type ==')')
 	{
 		int lc = 0, rc = 0;
-		for (i = start + 1; i < end; i ++)
+		for (i = p + 1; i < q; i ++)
 		{
 			if (tokens[i].type == '(')lc ++;
 			if (tokens[i].type == ')')rc ++;
-			if (rc > lc) return false;	//右括号数目不能超过左边括号数目
+			if (rc > lc) return false;
 		}
 		if (lc == rc) return true;
 	}
@@ -182,40 +182,40 @@ int find_dominanted_op (int p,int q)
 }
 
 
-int eval(int start, int end)
+int eval(int p, int q)
 {
-    if (start > end)
+    if (p > q)
         Assert(0, "Please check you expression\n");
-    else if (start == end)
+    else if (p == q)
 		{
 		uint32_t num = 0;
-		if (tokens[start].type == NUMBER)
-			sscanf(tokens[start].str,"%d",&num);
-		else if (tokens[start].type == HEX)
-			sscanf(tokens[start].str,"%x",&num);
-		else if (tokens[start].type == REGISTER)
+		if (tokens[p].type == NUMBER)
+			sscanf(tokens[p].str,"%d",&num);
+		else if (tokens[p].type == HEX)
+			sscanf(tokens[p].str,"%x",&num);
+		else if (tokens[p].type == REGISTER)
 		{
-			if (strlen (tokens[start].str) == 3) {
+			if (strlen (tokens[p].str) == 3) {
 				int i;
 				for (i = R_EAX; i <= R_EDI; i ++)
-					if (strcmp (tokens[start].str,regsl[start]) == 0) break;
+					if (strcmp (tokens[p].str,regsl[p]) == 0) break;
 				if (i > R_EDI)
-					if (strcmp (tokens[start].str,"eip") == 0)
+					if (strcmp (tokens[p].str,"eip") == 0)
 						num = cpu.eip;
 					else Assert (1,"no this register!\n");
 				else num = reg_l(i);
 			}
-			else if (strlen (tokens[start].str) == 2) {
-				if (tokens[start].str[1] == 'x' || tokens[start].str[1] == 'p' || tokens[start].str[1] == 'i') {
+			else if (strlen (tokens[p].str) == 2) {
+				if (tokens[p].str[1] == 'x' || tokens[p].str[1] == 'p' || tokens[p].str[1] == 'i') {
 					int i;
 					for (i = R_AX; i <= R_DI; i ++)
-						if (strcmp (tokens[start].str,regsw[i]) == 0)break;
+						if (strcmp (tokens[p].str,regsw[i]) == 0)break;
 					num = reg_w(i);
 				}
-				else if (tokens[start].str[1] == 'l' || tokens[start].str[1] == 'h') {
+				else if (tokens[p].str[1] == 'l' || tokens[p].str[1] == 'h') {
 					int i;
 					for (i = R_AL; i <= R_BH; i ++)
-						if (strcmp (tokens[start].str,regsb[i]) == 0)break;
+						if (strcmp (tokens[p].str,regsb[i]) == 0)break;
 					num = reg_b(i);
 				}
 				else assert (1);
@@ -227,15 +227,15 @@ int eval(int start, int end)
 		}
 		return num;
 	}
-    else if (check_parentheses(start, end) == true)
-        return eval(start + 1, end - 1);
+    else if (check_parentheses(p, q) == true)
+        return eval(p + 1, q - 1);
     else
     {
-		int op = find_dominanted_op (start,end);
- 		if (start == op || tokens[op].type == POINTOR || tokens[op].type == MINUS || tokens[op].type == '!')
+		int op = find_dominanted_op (p,q);
+ 		if (p == op || tokens[op].type == POINTOR || tokens[op].type == MINUS || tokens[op].type == '!')
 		{
-			uint32_t val = eval (start + 1, end);
-			switch (tokens[start].type)
+			uint32_t val = eval (p + 1, q);
+			switch (tokens[p].type)
  			{
 				case POINTOR:  return vaddr_read(val, 4);
 				case MINUS:return -val;
@@ -244,8 +244,8 @@ int eval(int start, int end)
 					return -1;
 			}
 		}
-		uint32_t val1 = eval (start, op - 1);
-		uint32_t val2 = eval (op + 1, end);
+		uint32_t val1 = eval (p, op - 1);
+		uint32_t val2 = eval (op + 1, q);
 		switch (tokens[op].type)
 		{
 			case '+':return val1 + val2;
