@@ -8,7 +8,7 @@
 #include <readline/history.h>
 
 void cpu_exec(uint64_t);
-
+uint32_t expr(char *, bool *);
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 char* rl_gets() {
   static char *line_read = NULL;
@@ -25,6 +25,25 @@ char* rl_gets() {
   }
 
   return line_read;
+}
+
+static int cmd_p(char *args)
+{
+    if (args != NULL)
+    {
+        bool success;
+        uint32_t ans = expr(args, &success);
+        if (success)
+            printf("\033[1m\033[33mResult is\033[0m %#xH \033[1m\033[33min hex, is\033[0m %d \033[1m\033[33min dec\033[0m\n", ans, ans);
+        else
+        {
+            printf("\033[1m\033[31mPlease check you expression\033[0m\n");
+            return 0;
+        }
+    }
+    else
+        printf("\n");
+    return 0;
 }
 
 static int cmd_x(char *args){  
@@ -88,7 +107,8 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   {"si", "Si 10 allows the program to suspend execution after executing 10 instructions in a single step. When n is not given, it defaults to 1",cmd_si},
   {"info","Info R is used to print register status",cmd_info},
-  {"x","X 10 $ESP finds the value of expression expr, takes the result as the starting memory address, and outputs n consecutive 4 bytes in hexadecimal form",cmd_x}
+  {"x","X 10 $ESP finds the value of expression expr, takes the result as the starting memory address, and outputs n consecutive 4 bytes in hexadecimal form",cmd_x},
+  {"p", "Compute the value of an expression", cmd_p}
   /* TODO: Add more commands */
 };
 
