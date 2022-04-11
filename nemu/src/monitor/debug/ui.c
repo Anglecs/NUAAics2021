@@ -6,7 +6,10 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-
+int set_watchpoint(char *args);
+bool delete_watchpoint(int NO);
+void list_watchpoint();
+WP *scan_watchpoint();
 void cpu_exec(uint64_t);
 uint32_t expr(char *, bool *);
 /* We use the `readline' library to provide more flexibility to read from stdin. */
@@ -25,6 +28,34 @@ char* rl_gets() {
   }
 
   return line_read;
+}
+
+
+
+static int cmd_d(char *args)
+{
+	if(args == NULL)
+	{
+	printf("Invalid expression!!\n");
+	}
+	else
+	{
+		int i;
+		sscanf(args,"%d",&i);
+		delete_watchpoint(i);
+	}
+	return 0;
+
+}
+
+static int cmd_w(char *args)
+{
+
+	if(args == NULL)
+		printf("bad expression!invalid!\n");
+	else
+		 set_watchpoint(args);
+	return 0;
 }
 
 static int cmd_p(char *args)
@@ -74,7 +105,11 @@ static int cmd_info(char *args)  {
         for(int i=0;i<8;i++)  
             printf("%s \t%x \t%d\n",regsl[i],cpu.gpr[i]._32,cpu.gpr[i]._32);  
         printf("$eip \t%x \t%d\n", cpu.eip, cpu.eip); 
-    }  
+    }
+	if(strcmp(arg,"w") == 0)
+	{
+	list_watchpoint();
+	}
     return 0;  
 } 
 
@@ -108,7 +143,9 @@ static struct {
   {"si", "Si 10 allows the program to suspend execution after executing 10 instructions in a single step. When n is not given, it defaults to 1",cmd_si},
   {"info","Info R is used to print register status",cmd_info},
   {"x","X 10 $ESP finds the value of expression expr, takes the result as the starting memory address, and outputs n consecutive 4 bytes in hexadecimal form",cmd_x},
-  {"p", "Compute the value of an expression", cmd_p}
+  {"p", "Compute the value of an expression", cmd_p},
+  {"w","set the watchpoint",cmd_w},
+  {"d","delete the watchpoint",cmd_d}
   /* TODO: Add more commands */
 };
 
