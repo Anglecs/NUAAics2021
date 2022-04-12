@@ -182,7 +182,7 @@ int find_dominanted_op (int p,int q)
 }
 
 
-int eval(int p, int q)
+uint32_t eval(int p, int q)
 {
     if (p > q)
         Assert(0, "Please check you expression\n");
