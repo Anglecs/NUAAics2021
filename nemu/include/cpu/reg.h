@@ -28,11 +28,33 @@ typedef struct {
    * in PA2 able to directly access these registers.
    */
  	  struct{
- 	       uint32_t eax, ecx, edx, ebx, esp, ebp, esi, edi;
-      };
-  };
+  rtlreg_t eax, ecx, edx, ebx, esp, ebp, esi, edi;
   vaddr_t eip;
 
+union {
+  uint32_t val;
+  struct
+   {
+	   uint32_t CF:1;
+	   unsigned :5;
+	   uint32_t ZF:1;
+	   uint32_t SF:1;
+	   unsigned :1;
+	   uint32_t IF:1;
+	   unsigned :1;
+	   uint32_t OF:1;
+	   unsigned :20;
+   };
+ }eflags;
+
+struct {
+       uint32_t base;
+       uint16_t limit;
+} idtr;
+bool INTR;
+uint32_t cs;
+};
+};
 } CPU_state;
 
 extern CPU_state cpu;
