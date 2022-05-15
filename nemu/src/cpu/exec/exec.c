@@ -41,30 +41,30 @@ static make_EHelper(name) { \
 
 /* 0x80, 0x81, 0x83 */
 make_group(gp1,
-    EXW(add,1), EMPTY, EMPTY, EMPTY,
-    EXW(and,1), EXW(sub,1), EMPTY, EXW(cmp,1))
+    EX(add), EX(or), EX(adc), EX(sbb),
+    EX(and), EX(sub), EX(xor), EX(cmp))
 
-  /* 0xc0, 0xc1, 0xd0, 0xd1, 0xd2, 0xd3 */
+/* 0xc0, 0xc1, 0xd0, 0xd1, 0xd2, 0xd3 */
 make_group(gp2,
-    EMPTY, EMPTY, EMPTY, EMPTY,
-    EXW(shl,1), EX(shr), EMPTY, EXW(sar,1))
+    EX(rol), EMPTY, EMPTY, EMPTY,
+    EX(shl), EX(shr), EMPTY, EX(sar))
 
-  /* 0xf6, 0xf7 */
+/* 0xf6, 0xf7 */
 make_group(gp3,
-    IDEX(test_I,test), EMPTY, EX(not), EMPTY,
-    EX(mul), EX(imul1),EX(div), EX(idiv))
+    IDEX(test_I, test), EMPTY, EX(not), EX(neg),
+    EX(mul), EX(imul1), EX(div), EX(idiv))
 
-  /* 0xfe */
+/* 0xfe */
 make_group(gp4,
-    EMPTY, EXW(dec,1), EMPTY, EMPTY,
+    EX(inc), EX(dec), EMPTY, EMPTY,
     EMPTY, EMPTY, EMPTY, EMPTY)
 
-  /* 0xff */
+/* 0xff */
 make_group(gp5,
     EX(inc), EX(dec), EX(call_rm), EX(call),
-    EX(jmp_rm), EMPTY, EX(push),EMPTY)
+    EX(jmp_rm), EMPTY, EX(push), EMPTY)
 
-  /* 0x0f 0x01*/
+/* 0x0f 0x01*/
 make_group(gp7,
     EMPTY, EMPTY, EMPTY, EX(lidt),
     EMPTY, EMPTY, EMPTY, EMPTY)
