@@ -5,18 +5,28 @@
 int mm_brk(uint32_t new_brk);
 
 static inline uintptr_t sys_open(uintptr_t pathname, uintptr_t flags, uintptr_t mode) {
-  TODO();
-  return 1;
+  
+  return fs_open((const char *)pathname,flags,mode);
 }
 
 static inline uintptr_t sys_write(uintptr_t fd, uintptr_t buf, uintptr_t len) {
-  TODO();
-  return 1;
+  char *p=(char *)buf; 
+  int i=0;
+  if(fd == 1||fd ==2)
+  {for(;i<len;++i)
+	  _putc(p[i]);
+  }
+  else
+  {
+	  return fs_write(fd,(const void *)buf,len);
+  }
+  return len;
+  
 }
 
 static inline uintptr_t sys_read(uintptr_t fd, uintptr_t buf, uintptr_t len) {
-  TODO();
-  return 1;
+ 
+  return fs_read(fd,(void *)buf,len);
 }
 
 static inline uintptr_t sys_lseek(uintptr_t fd, uintptr_t offset, uintptr_t whence) {
@@ -24,13 +34,14 @@ static inline uintptr_t sys_lseek(uintptr_t fd, uintptr_t offset, uintptr_t when
 }
 
 static inline uintptr_t sys_close(uintptr_t fd) {
-  TODO();
-  return 1;
+  
+  return fs_close(fd);
 }
-
+intptr_t program_brk;
 static inline uintptr_t sys_brk(uintptr_t new_brk) {
-  TODO();
-  return 1;
+   program_brk = (intptr_t)new_brk;
+ return mm_brk((uintptr_t)program_brk);
+  
 }
 
 _RegSet* do_syscall(_RegSet *r) {
