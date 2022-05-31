@@ -39,10 +39,10 @@ static inline uintptr_t sys_close(uintptr_t fd) {
 }
 intptr_t program_brk;
 static inline uintptr_t sys_brk(uintptr_t new_brk) {
-   program_brk = (intptr_t)new_brk;
+  program_brk = (intptr_t)new_brk;
  return mm_brk((uintptr_t)program_brk);
-  
 }
+
 
 _RegSet* do_syscall(_RegSet *r) {
   uintptr_t a[4];
