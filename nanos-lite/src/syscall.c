@@ -11,7 +11,7 @@ return 1;
 }
 
 static inline uintptr_t sys_exit(_RegSet *r) {
-  _halt(SYSCALL_ARG2(r));
+  _halt(SYSCALL_ARG1(r));
   return 1;
 }
 
