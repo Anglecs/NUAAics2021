@@ -11,7 +11,7 @@ return 1;
 }
 
 static inline uintptr_t sys_exit(_RegSet *r) {
-  _halt(SYSCALL_ARG4(r));
+  _halt(SYSCALL_ARG2(r));
   return 1;
 }
 
@@ -21,18 +21,7 @@ static inline uintptr_t sys_open(uintptr_t pathname, uintptr_t flags, uintptr_t 
 }
 
 static inline uintptr_t sys_write(uintptr_t fd, uintptr_t buf, uintptr_t len) {
-  char *p=(char *)buf; 
-  int i=0;
-  if(fd == 1||fd ==2)
-  {for(;i<len;++i)
-	  _putc(p[i]);
-  }
-  else
-  {
-	  return fs_write(fd,(const void *)buf,len);
-  }
-  return len;
-  
+  return fs_write(fd,(void *)buf,len);
 }
 
 static inline uintptr_t sys_read(uintptr_t fd, uintptr_t buf, uintptr_t len) {
