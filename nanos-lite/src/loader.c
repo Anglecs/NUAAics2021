@@ -9,7 +9,7 @@ uintptr_t loader(_Protect *as, const char *filename) {
  int fd = fs_open(filename,0,0);
  size_t lens= fs_filesz(fd);
  void *pa;
- void *end = DEFAULT_ENTRY+lens;
+// void *end = DEFAULT_ENTRY+lens;
  void *va=DEFAULT_ENTRY;
  int page_count=lens/PGSIZE+1;
  for(int i=0;i<page_count;i++)
@@ -17,7 +17,9 @@ uintptr_t loader(_Protect *as, const char *filename) {
 	pa = new_page();
     Log("Map va to pa: 0x%08x to 0x%08x", va, pa);
 	 _map(as,va,pa);
-	fs_read(fd,pa,(end-va)<PGSIZE ?(end - va):PGSIZE);
+	fs_read(fd,pa,PGSIZE);
+	va+=PGSIZE;
+//	fs_read(fd,pa,(end-va)<PGSIZE ?(end - va):PGSIZE);
  }
  fs_close(fd);
 return (uintptr_t)DEFAULT_ENTRY;
