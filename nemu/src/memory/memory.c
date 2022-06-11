@@ -29,10 +29,64 @@ void paddr_write(paddr_t addr, int len, uint32_t data) {
   memcpy(guest_to_host(addr), &data, len);
 }
 
+paddr_t page_translate(vaddr_t addr, bool is_write){
+	uint32_t DIR = addr >> 22;
+  uint32_t PAGE = addr >> 12 & 0x000003FF;
+  uint32_t OFFSET = addr & 0x00000FFF;
+  paddr_t PhysicalAddr = addr;
+
+
+  if (cpu.cr0.val & 0x80000000) {
+    uint32_t PageTable = paddr_read(cpu.cr3.val + 4 * DIR, 4) & 0xFFFFF000;
+    if(!(paddr_read(cpu.cr3.val + 4 * DIR, 4) & 0x00000001)) {
+      Log("FATAL: Virtual Address is 0x%08X", addr);
+      Log("FATAL: eip = 0x%08X at PD", cpu.eip);
+    }
+    assert(paddr_read(cpu.cr3.val + 4 * DIR, 4) & 0x00000001); 
+    paddr_write(cpu.cr3.val + 4 * DIR, 4, (paddr_read(cpu.cr3.val + 4 * DIR, 4) | 0x00000020)); 
+    uint32_t PageTableEntry = paddr_read(PageTable + 4 * PAGE, 4);
+    if(!(PageTableEntry & 0x00000001)) {
+      Log("FATAL: Virtual Address is 0x%08X", addr);
+      Log("FATAL: eip = 0x%08X at PT", cpu.eip);
+    }
+    assert(PageTableEntry & 0x00000001); 
+    paddr_write(PageTable + 4 * PAGE, 4, (paddr_read(PageTable + 4 * PAGE, 4) | 0x00000020)); 
+    if (is_write) 
+      paddr_write(PageTable + 4 * PAGE, 4, (paddr_read(PageTable + 4 * PAGE, 4) | 0x00000040)); 
+    PhysicalAddr = (paddr_read(PageTable + 4 * PAGE, 4) & 0xFFFFF000) + OFFSET;
+  }
+  return PhysicalAddr;
+	}
 uint32_t vaddr_read(vaddr_t addr, int len) {
+  uint32_t OFFSET = addr & 0x00000FFF;
+  if (cpu.cr0.val & 0x80000000) {
+    if (OFFSET + len > 0x00001000) {
+      int len1 = 0x00001000 - OFFSET;
+      int len2 = len - len1;
+      uint32_t part1 = paddr_read(page_translate(addr, false), len1); // low len1 bytes
+      uint32_t part2 = paddr_read(page_translate(addr + len1, false), len2); // high len2 bytes
+      // stich together
+      return part1 + (part2 << (len1 * 8));
+    }
+
+    return paddr_read(page_translate(addr, false), len);
+  }
   return paddr_read(addr, len);
 }
 
 void vaddr_write(vaddr_t addr, int len, uint32_t data) {
-  paddr_write(addr, len, data);
+  uint32_t OFFSET = addr & 0x00000FFF;
+  if (cpu.cr0.val & 0x80000000) {
+    if (OFFSET + len > 0x00001000) {
+      int len1 = 0x00001000 - OFFSET;
+      int len2 = len - len1;
+      paddr_write(page_translate(addr, true), len1, data); // low len1 bytes
+      data >>= (len1 * 8);
+      paddr_write(page_translate(addr + len1, true), len2, data); // high len2 bytes
+    }
+    else
+      paddr_write(page_translate(addr, true), len, data);
+  }
+  else
+    paddr_write(addr, len, data);
 }
